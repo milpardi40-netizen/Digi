@@ -15,10 +15,15 @@ import { db } from "@/db";
 import { shops, products } from "@/db/schema";
 import { queryProducts } from "@/lib/catalog";
 import { formatDateFa, toFaDigits } from "@/lib/format";
+import { STATIC_SHOPS, staticGetShopBySlug, staticGetShopsWithStats } from "@/lib/static-data";
 import ProductCard from "@/components/ProductCard";
 import FollowShopButton from "@/components/FollowShopButton";
 
 export const dynamic = "force-dynamic";
+
+export function generateStaticParams() {
+  return STATIC_SHOPS.map((s) => ({ slug: s.slug }));
+}
 
 export async function generateMetadata({
   params,
@@ -26,7 +31,10 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const [shop] = await db.select().from(shops).where(eq(shops.slug, slug)).limit(1);
+  const shop =
+    process.env.GITHUB_PAGES === "true"
+      ? staticGetShopBySlug(slug)
+      : (await db.select().from(shops).where(eq(shops.slug, slug)).limit(1))[0];
   return { title: shop ? shop.name : "فروشگاه" };
 }
 
@@ -36,17 +44,22 @@ export default async function ShopPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [shop] = await db.select().from(shops).where(eq(shops.slug, slug)).limit(1);
+  const isStatic = process.env.GITHUB_PAGES === "true";
+  const shop = isStatic
+    ? staticGetShopBySlug(slug)
+    : (await db.select().from(shops).where(eq(shops.slug, slug)).limit(1))[0];
   if (!shop) notFound();
 
   const [{ products: shopProducts, total }, [salesAgg]] = await Promise.all([
     queryProducts({ shop: shop.slug, limit: 48 }),
-    db
-      .select({
-        totalSales: sql<number>`coalesce(sum(${products.salesCount}), 0)::int`,
-      })
-      .from(products)
-      .where(eq(products.shopId, shop.id)),
+    isStatic
+      ? Promise.resolve([{ totalSales: staticGetShopsWithStats().find((s) => s.slug === shop.slug)?.salesCount ?? 0 }])
+      : db
+          .select({
+            totalSales: sql<number>`coalesce(sum(${products.salesCount}), 0)::int`,
+          })
+          .from(products)
+          .where(eq(products.shopId, shop.id)),
   ]);
 
   return (

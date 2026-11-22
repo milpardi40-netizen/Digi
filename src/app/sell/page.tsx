@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { assetUrl } from "@/lib/assets";
 import {
   UserPlus,
   Upload,
@@ -59,7 +60,7 @@ export default function SellPage() {
       <div className="relative overflow-hidden bg-[#160f07]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/images/hero-artist.jpg"
+          src={assetUrl("/images/hero-artist.jpg")}
           alt="دست‌های هنرمند روی چرخ سفالگری"
           className="absolute inset-0 h-full w-full object-cover"
           fetchPriority="high"

@@ -6,6 +6,7 @@ import { db } from "@/db";
 import { shops, products } from "@/db/schema";
 import ShopCard from "@/components/ShopCard";
 import { toFaDigits } from "@/lib/format";
+import { staticGetShopsWithStats } from "@/lib/static-data";
 
 export const dynamic = "force-dynamic";
 
@@ -15,22 +16,25 @@ export const metadata: Metadata = {
 };
 
 export default async function ShopsPage() {
-  const shopRows = await db
-    .select({
-      id: shops.id,
-      name: shops.name,
-      slug: shops.slug,
-      city: shops.city,
-      story: shops.story,
-      avatarColor: shops.avatarColor,
-      verified: shops.verified,
-      productsCount: sql<number>`count(${products.id})::int`,
-      salesCount: sql<number>`coalesce(sum(${products.salesCount}), 0)::int`,
-    })
-    .from(shops)
-    .leftJoin(products, sql`${products.shopId} = ${shops.id}`)
-    .groupBy(shops.id)
-    .orderBy(desc(shops.verified), desc(sql`coalesce(sum(${products.salesCount}), 0)`));
+  const shopRows =
+    process.env.GITHUB_PAGES === "true"
+      ? staticGetShopsWithStats()
+      : await db
+          .select({
+            id: shops.id,
+            name: shops.name,
+            slug: shops.slug,
+            city: shops.city,
+            story: shops.story,
+            avatarColor: shops.avatarColor,
+            verified: shops.verified,
+            productsCount: sql<number>`count(${products.id})::int`,
+            salesCount: sql<number>`coalesce(sum(${products.salesCount}), 0)::int`,
+          })
+          .from(shops)
+          .leftJoin(products, sql`${products.shopId} = ${shops.id}`)
+          .groupBy(shops.id)
+          .orderBy(desc(shops.verified), desc(sql`coalesce(sum(${products.salesCount}), 0)`));
 
   const totalProducts = shopRows.reduce((acc, s) => acc + s.productsCount, 0);
 

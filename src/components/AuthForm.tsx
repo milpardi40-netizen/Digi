@@ -19,6 +19,7 @@ import {
   Wand2,
 } from "lucide-react";
 import { useToast } from "@/lib/toast";
+import StaticModeNotice from "@/components/StaticModeNotice";
 
 export default function AuthForm({
   mode,
@@ -42,6 +43,15 @@ export default function AuthForm({
   const [role, setRole] = useState<"buyer" | "seller">(initialRole);
   const [shopName, setShopName] = useState("");
   const [shopCity, setShopCity] = useState("");
+
+  if (process.env.NEXT_PUBLIC_GITHUB_PAGES === "true") {
+    return (
+      <StaticModeNotice
+        title={isLogin ? "ورود به حساب کاربری" : "ثبت‌نام در هنربازار"}
+        description="در نسخه استاتیک GitHub Pages امکان ورود یا ثبت‌نام با دیتابیس وجود ندارد، اما می‌توانید تمامی آثار هنری، فروشگاه‌ها و سبد خرید را بدون نیاز به ورود استفاده کنید."
+      />
+    );
+  }
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();

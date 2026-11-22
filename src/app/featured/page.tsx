@@ -13,7 +13,7 @@ export default async function FeaturedPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const sp = await searchParams;
+  const sp = process.env.GITHUB_PAGES === "true" ? {} : await searchParams;
 
   return (
     <ListingView

@@ -17,6 +17,7 @@ import { users, shops, products, orders, payoutRequests } from "@/db/schema";
 import { requireAdmin, getDefaultCommission } from "@/lib/marketplace";
 import { formatPrice, formatDateFa, toFaDigits } from "@/lib/format";
 import AdminNav from "@/components/AdminNav";
+import StaticModeNotice from "@/components/StaticModeNotice";
 import {
   AdminSettingsForm,
   AdminVerifyButton,
@@ -27,6 +28,9 @@ import {
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
+  if (process.env.GITHUB_PAGES === "true") {
+    return <StaticModeNotice title="پنل مدیریت هنربازار" />;
+  }
   const admin = await requireAdmin();
   if (!admin) {
     return (

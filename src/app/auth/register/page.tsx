@@ -8,7 +8,7 @@ export default async function RegisterPage({
 }: {
   searchParams: Promise<{ next?: string; role?: string }>;
 }) {
-  const sp = await searchParams;
+  const sp = process.env.GITHUB_PAGES === "true" ? {} : await searchParams;
   const role = sp.role === "seller" ? "seller" : "buyer";
   return <AuthForm mode="register" next={sp.next ?? "/"} initialRole={role} />;
 }

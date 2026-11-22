@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { formatPrice, toFaDigits } from "@/lib/format";
+import { staticQueryProducts } from "@/lib/static-data";
 
 /* ───────── مگامنوی دسته‌بندی هنر و صنایع‌دستی ───────── */
 type MegaLink = { label: string; q: string };
@@ -311,6 +312,10 @@ export default function Header() {
   }, [pathname]);
 
   useEffect(() => {
+    if (process.env.NEXT_PUBLIC_GITHUB_PAGES === "true") {
+      setUser(null);
+      return;
+    }
     fetch("/api/auth/me")
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => setUser(d?.user ?? null))
@@ -321,6 +326,19 @@ export default function Header() {
     window.clearTimeout(debounce.current);
     if (query.trim().length < 2) {
       setSuggestions([]);
+      return;
+    }
+    if (process.env.NEXT_PUBLIC_GITHUB_PAGES === "true") {
+      const { products } = staticQueryProducts({ q: query, limit: 6 });
+      setSuggestions(
+        products.map((p) => ({
+          id: p.id,
+          slug: p.slug,
+          name: p.name,
+          image: p.image,
+          price: p.price,
+        }))
+      );
       return;
     }
     debounce.current = window.setTimeout(async () => {

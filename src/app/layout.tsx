@@ -1,24 +1,17 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
-import { Vazirmatn, Lalezar } from "next/font/google";
+import "@fontsource/vazirmatn/400.css";
+import "@fontsource/vazirmatn/500.css";
+import "@fontsource/vazirmatn/700.css";
+import "@fontsource/vazirmatn/800.css";
+import "@fontsource/vazirmatn/900.css";
+import "@fontsource/lalezar/400.css";
 import "./globals.css";
 import { CartProvider } from "@/lib/cart";
 import { ToastProvider } from "@/lib/toast";
+import { assetUrl } from "@/lib/assets";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-
-const vazir = Vazirmatn({
-  subsets: ["arabic", "latin"],
-  variable: "--font-vazir",
-  display: "swap",
-});
-
-const lalezar = Lalezar({
-  subsets: ["arabic", "latin"],
-  weight: "400",
-  variable: "--font-lalezar",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: {
@@ -27,7 +20,7 @@ export const metadata: Metadata = {
   },
   description:
     "خرید مستقیم آثار دست‌ساز اصیل ایرانی از هنرمندان سراسر کشور؛ سفال لالجین، گلیم کردستان، فیروزه‌کوبی نیشابور، سوزن‌دوزی بلوچ، خاتم اصفهان و هزاران اثر هنری با ضمانت اصالت و ارسال مطمئن.",
-  icons: { icon: "/favicon.svg" },
+  icons: { icon: assetUrl("/favicon.svg") },
 };
 
 export const viewport: Viewport = {
@@ -38,7 +31,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="fa" dir="rtl" className={`${vazir.variable} ${lalezar.variable}`}>
+    <html lang="fa" dir="rtl">
       <body className="bg-digi-bg font-sans text-digi-text antialiased">
         <ToastProvider>
           <CartProvider>

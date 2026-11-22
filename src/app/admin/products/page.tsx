@@ -7,11 +7,15 @@ import { eq } from "drizzle-orm";
 import { requireAdmin } from "@/lib/marketplace";
 import { formatPrice, toFaDigits } from "@/lib/format";
 import AdminNav from "@/components/AdminNav";
+import StaticModeNotice from "@/components/StaticModeNotice";
 import { AdminFeatureButton, AdminDeleteProduct } from "@/components/AdminActions";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminProductsPage() {
+  if (process.env.GITHUB_PAGES === "true") {
+    return <StaticModeNotice title="مدیریت آثار" />;
+  }
   const admin = await requireAdmin();
   if (!admin) {
     return (

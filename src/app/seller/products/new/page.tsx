@@ -7,6 +7,7 @@ import { db } from "@/db";
 import { categories } from "@/db/schema";
 import { getMyShop } from "@/lib/marketplace";
 import ProductForm from "@/components/ProductForm";
+import StaticModeNotice from "@/components/StaticModeNotice";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,9 @@ const SUGGESTED = [
 ];
 
 export default async function NewProductPage() {
+  if (process.env.GITHUB_PAGES === "true") {
+    return <StaticModeNotice title="ثبت اثر جدید" />;
+  }
   const user = await getSessionUser();
   if (!user) redirect("/auth/login?next=/seller/products/new");
   const shop = await getMyShop(user.id);

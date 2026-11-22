@@ -12,6 +12,21 @@ export default async function SearchPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  if (process.env.GITHUB_PAGES === "true") {
+    return (
+      <ListingView
+        title="همه آثار هنربازار"
+        subtitle="مرور همه آثار دست‌ساز ثبت‌شده در هنربازار"
+        breadcrumb={["جستجو"]}
+        basePath="/search"
+        searchParams={{}}
+        fixed={{}}
+        fixedQuery={{}}
+        dynamicSearchTitle
+      />
+    );
+  }
+
   const sp = await searchParams;
   const qRaw = sp.q;
   const q = (Array.isArray(qRaw) ? qRaw[0] : qRaw)?.trim() ?? "";

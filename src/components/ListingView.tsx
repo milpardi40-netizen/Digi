@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Sparkles, SearchX } from "lucide-react";
 import { asc } from "drizzle-orm";
@@ -5,8 +6,10 @@ import { db } from "@/db";
 import { shops } from "@/db/schema";
 import { queryProducts, type CatalogParams, type ProductRow } from "@/lib/catalog";
 import { toFaDigits } from "@/lib/format";
+import { assetUrl } from "@/lib/assets";
 import ProductCard from "@/components/ProductCard";
 import FilterSidebar from "@/components/FilterSidebar";
+import ClientListing from "@/components/ClientListing";
 
 const PAGE_SIZE = 12;
 
@@ -25,6 +28,7 @@ export default async function ListingView({
   fixedQuery,
   featuredTheme = false,
   heroImage,
+  dynamicSearchTitle = false,
 }: {
   title: string;
   subtitle?: string;
@@ -35,7 +39,26 @@ export default async function ListingView({
   fixedQuery: Record<string, string>;
   featuredTheme?: boolean;
   heroImage?: string;
+  dynamicSearchTitle?: boolean;
 }) {
+  if (process.env.GITHUB_PAGES === "true") {
+    return (
+      <Suspense fallback={<div className="container-digi py-8"><div className="h-72 animate-pulse rounded-2xl bg-white" /></div>}>
+        <ClientListing
+          title={title}
+          subtitle={subtitle}
+          breadcrumb={breadcrumb}
+          basePath={basePath}
+          fixed={fixed}
+          fixedQuery={fixedQuery}
+          featuredTheme={featuredTheme}
+          heroImage={heroImage}
+          dynamicSearchTitle={dynamicSearchTitle}
+        />
+      </Suspense>
+    );
+  }
+
   const page = Math.max(1, Number(str(searchParams.page)) || 1);
   const sort = str(searchParams.sort) ?? "default";
   const shop = str(searchParams.shop);
@@ -82,7 +105,7 @@ export default async function ListingView({
         {heroImage && (
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={heroImage} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
+            <img src={assetUrl(heroImage)} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
             <div className="absolute inset-0 bg-linear-to-l from-[#160f07]/88 via-[#160f07]/55 to-[#160f07]/20" />
           </>
         )}
