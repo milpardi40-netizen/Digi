@@ -18,6 +18,7 @@ import { db } from "@/db";
 import { comments } from "@/db/schema";
 import { getProductBySlug, queryProducts } from "@/lib/catalog";
 import { discountPercent, toFaDigits } from "@/lib/format";
+import { STATIC_PRODUCTS, staticGetCommentsByProductId } from "@/lib/static-data";
 import Price from "@/components/Price";
 import Rating from "@/components/Rating";
 import ProductTabs, { type SerializedComment } from "@/components/ProductTabs";
@@ -26,6 +27,10 @@ import FavoriteToggle from "@/components/FavoriteToggle";
 import ProductCarousel from "@/components/ProductCarousel";
 
 export const dynamic = "force-dynamic";
+
+export function generateStaticParams() {
+  return STATIC_PRODUCTS.map((p) => ({ slug: p.slug }));
+}
 
 export async function generateMetadata({
   params,
@@ -46,13 +51,16 @@ export default async function ProductPage({
   const p = await getProductBySlug(slug);
   if (!p) notFound();
 
+  const isStatic = process.env.GITHUB_PAGES === "true";
   const [commentRows, relatedRes, shopProductsRes] = await Promise.all([
-    db
-      .select()
-      .from(comments)
-      .where(eq(comments.productId, p.id))
-      .orderBy(desc(comments.createdAt))
-      .limit(20),
+    isStatic
+      ? Promise.resolve(staticGetCommentsByProductId(p.id))
+      : db
+          .select()
+          .from(comments)
+          .where(eq(comments.productId, p.id))
+          .orderBy(desc(comments.createdAt))
+          .limit(20),
     queryProducts({ category: p.categorySlug ?? undefined, limit: 13 }),
     queryProducts({ shop: p.shopSlug, limit: 13 }),
   ]);

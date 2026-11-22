@@ -13,14 +13,15 @@ export default async function CheckoutSuccessPage({
 }: {
   searchParams: Promise<{ id?: string }>;
 }) {
-  const sp = await searchParams;
-  const user = await getSessionUser();
+  const isStatic = process.env.GITHUB_PAGES === "true";
+  const sp = isStatic ? {} : await searchParams;
+  const user = isStatic ? null : await getSessionUser();
   const orderId = Number(sp.id);
 
   let order: (typeof orders.$inferSelect) | null = null;
   let items: (typeof orderItems.$inferSelect)[] = [];
 
-  if (user && Number.isFinite(orderId)) {
+  if (!isStatic && user && Number.isFinite(orderId)) {
     const [row] = await db
       .select()
       .from(orders)

@@ -8,6 +8,6 @@ export default async function LoginPage({
 }: {
   searchParams: Promise<{ next?: string }>;
 }) {
-  const sp = await searchParams;
+  const sp = process.env.GITHUB_PAGES === "true" ? {} : await searchParams;
   return <AuthForm mode="login" next={sp.next ?? "/"} />;
 }

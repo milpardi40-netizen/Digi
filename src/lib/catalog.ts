@@ -39,6 +39,10 @@ export type ProductRow = {
 };
 
 export async function queryProducts(p: CatalogParams): Promise<{ products: ProductRow[]; total: number }> {
+  if (process.env.GITHUB_PAGES === "true") {
+    const { staticQueryProducts } = await import("@/lib/static-data");
+    return staticQueryProducts(p);
+  }
   const conditions: SQL[] = [];
 
   if (p.q?.trim()) {
@@ -126,6 +130,10 @@ export async function queryProducts(p: CatalogParams): Promise<{ products: Produ
 }
 
 export async function getProductBySlug(slug: string) {
+  if (process.env.GITHUB_PAGES === "true") {
+    const { staticGetProductBySlug } = await import("@/lib/static-data");
+    return staticGetProductBySlug(slug);
+  }
   const rows = await db
     .select({
       id: products.id,

@@ -6,11 +6,15 @@ import { shops, products } from "@/db/schema";
 import { requireAdmin } from "@/lib/marketplace";
 import { toFaDigits } from "@/lib/format";
 import AdminNav from "@/components/AdminNav";
+import StaticModeNotice from "@/components/StaticModeNotice";
 import { AdminVerifyButton, AdminCommissionInput } from "@/components/AdminActions";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminSellersPage() {
+  if (process.env.GITHUB_PAGES === "true") {
+    return <StaticModeNotice title="مدیریت فروشندگان" />;
+  }
   const admin = await requireAdmin();
   if (!admin) {
     return (

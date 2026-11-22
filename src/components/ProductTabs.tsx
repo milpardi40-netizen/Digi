@@ -71,6 +71,7 @@ export default function ProductTabs({
           : c
       )
     );
+    if (process.env.NEXT_PUBLIC_GITHUB_PAGES === "true") return;
     try {
       await fetch("/api/comments/vote", {
         method: "POST",
@@ -86,6 +87,24 @@ export default function ProductTabs({
     e.preventDefault();
     if (text.trim().length < 3) {
       toast("متن نظر را کامل‌تر بنویسید");
+      return;
+    }
+    if (process.env.NEXT_PUBLIC_GITHUB_PAGES === "true") {
+      setComments((prev) => [
+        {
+          id: Date.now(),
+          userName: "بازدیدکننده مهمان",
+          rating: myRating,
+          text: text.trim(),
+          likes: 0,
+          dislikes: 0,
+          createdAt: new Date().toISOString(),
+        },
+        ...prev,
+      ]);
+      setText("");
+      setMyRating(5);
+      toast("نظر شما در پیش‌نمایش ثبت شد");
       return;
     }
     setSubmitting(true);

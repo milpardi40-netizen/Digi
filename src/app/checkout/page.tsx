@@ -50,6 +50,24 @@ export default function CheckoutPage() {
 
   /* احراز هویت و دریافت آدرس‌ها */
   useEffect(() => {
+    if (process.env.NEXT_PUBLIC_GITHUB_PAGES === "true") {
+      const demoAddr: AddressRow = {
+        id: 1,
+        title: "آدرس پیش‌فرض (نسخه نمایشی)",
+        province: "تهران",
+        city: "تهران",
+        address: "خیابان ولیعصر، بالاتر از پارک ملت، کوچه بهار، پلاک ۱۲",
+        plaque: "۱۲",
+        unit: "۳",
+        postalCode: "1418835533",
+        recipient: "مهمان هنربازار",
+        phone: "09123456789",
+      };
+      setAuthState("ok");
+      setAddresses([demoAddr]);
+      setSelectedAddress(1);
+      return;
+    }
     let cancelled = false;
     (async () => {
       try {
@@ -94,7 +112,14 @@ export default function CheckoutPage() {
     }
     setPlacing(true);
     // شبیه‌سازی اتصال به درگاه بانکی
-    await new Promise((r) => setTimeout(r, 1600));
+    await new Promise((r) => setTimeout(r, 1200));
+    if (process.env.NEXT_PUBLIC_GITHUB_PAGES === "true") {
+      clear();
+      localStorage.removeItem("digi-promo");
+      toast("سفارش نمایشی با موفقیت ثبت شد");
+      router.replace("/checkout/success");
+      return;
+    }
     try {
       const res = await fetch("/api/orders", {
         method: "POST",

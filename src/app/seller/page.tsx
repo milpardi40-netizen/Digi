@@ -23,10 +23,14 @@ import { formatPrice, formatDateFa, toFaDigits } from "@/lib/format";
 import PayoutSection, { type PayoutRow } from "@/components/PayoutSection";
 import SellerProductList, { type SellerProductRow } from "@/components/SellerProductList";
 import SellerOrderList, { type SellerOrderItemRow } from "@/components/SellerOrderList";
+import StaticModeNotice from "@/components/StaticModeNotice";
 
 export const dynamic = "force-dynamic";
 
 export default async function SellerDashboardPage() {
+  if (process.env.GITHUB_PAGES === "true") {
+    return <StaticModeNotice title="پنل فروشنده هنربازار" />;
+  }
   const user = await getSessionUser();
   if (!user) {
     return (

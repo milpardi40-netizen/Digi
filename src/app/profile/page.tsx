@@ -15,6 +15,7 @@ import { desc, eq, inArray } from "drizzle-orm";
 import { formatPrice, formatDateFa, toFaDigits, formatCompactFa } from "@/lib/format";
 import LogoutButton from "@/components/LogoutButton";
 import ProfileAddresses from "@/components/ProfileAddresses";
+import StaticModeNotice from "@/components/StaticModeNotice";
 import type { AddressRow } from "@/components/AddressForm";
 
 export const dynamic = "force-dynamic";
@@ -27,6 +28,9 @@ const STATUS: Record<string, { label: string; className: string }> = {
 };
 
 export default async function ProfilePage() {
+  if (process.env.GITHUB_PAGES === "true") {
+    return <StaticModeNotice title="پروفایل کاربری و پیگیری سفارش‌ها" />;
+  }
   const user = await getSessionUser();
   if (!user) redirect("/auth/login?next=/profile");
 

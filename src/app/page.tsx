@@ -27,6 +27,8 @@ import { db } from "@/db";
 import { categories, shops, products } from "@/db/schema";
 import { queryProducts, type ProductRow } from "@/lib/catalog";
 import { toFaDigits } from "@/lib/format";
+import { assetUrl } from "@/lib/assets";
+import { STATIC_CATEGORIES, staticGetShopsWithStats } from "@/lib/static-data";
 import Stories from "@/components/Stories";
 import HeroSlider from "@/components/HeroSlider";
 import ProductCarousel from "@/components/ProductCarousel";
@@ -66,23 +68,26 @@ const toCard = (p: ProductRow): ProductCardData => ({
 });
 
 export default async function HomePage() {
+  const isStatic = process.env.GITHUB_PAGES === "true";
   const [cats, shopRows, featuredRes, newestRes, salesRes, discountRes, topRes] = await Promise.all([
-    db.select().from(categories).orderBy(asc(categories.sort)),
-    db
-      .select({
-        id: shops.id,
-        name: shops.name,
-        slug: shops.slug,
-        city: shops.city,
-        story: shops.story,
-        avatarColor: shops.avatarColor,
-        verified: shops.verified,
-        productsCount: sql<number>`count(${products.id})::int`,
-      })
-      .from(shops)
-      .leftJoin(products, sql`${products.shopId} = ${shops.id}`)
-      .groupBy(shops.id)
-      .orderBy(desc(shops.verified), desc(sql`count(${products.id})`)),
+    isStatic ? Promise.resolve(STATIC_CATEGORIES) : db.select().from(categories).orderBy(asc(categories.sort)),
+    isStatic
+      ? Promise.resolve(staticGetShopsWithStats())
+      : db
+          .select({
+            id: shops.id,
+            name: shops.name,
+            slug: shops.slug,
+            city: shops.city,
+            story: shops.story,
+            avatarColor: shops.avatarColor,
+            verified: shops.verified,
+            productsCount: sql<number>`count(${products.id})::int`,
+          })
+          .from(shops)
+          .leftJoin(products, sql`${products.shopId} = ${shops.id}`)
+          .groupBy(shops.id)
+          .orderBy(desc(shops.verified), desc(sql`count(${products.id})`)),
     queryProducts({ featured: true, limit: 12 }),
     queryProducts({ sort: "newest", limit: 12 }),
     queryProducts({ sort: "sales", limit: 12 }),
@@ -149,7 +154,7 @@ export default async function HomePage() {
       {/* بنر مأموریت و آمار — با تصویر بازارچه سنتی */}
       <section className="relative flex flex-col items-center justify-between gap-3 overflow-hidden rounded-2xl px-5 py-6 text-center md:flex-row md:text-right">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/images/hero-kilim.jpg" alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+        <img src={assetUrl("/images/hero-kilim.jpg")} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-linear-to-l from-[#160f07]/90 via-[#160f07]/65 to-[#160f07]/35" />
         <div className="relative flex items-center gap-3">
           <HeartHandshake size={36} className="shrink-0 text-saffron" strokeWidth={1.4} />
@@ -224,7 +229,7 @@ export default async function HomePage() {
           <Link href="/featured" className="group relative block aspect-[4/3] overflow-hidden rounded-2xl bg-digi-border">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/images/hero-lighting.jpg"
+              src={assetUrl("/images/hero-lighting.jpg")}
               alt="منتخب سردبیر"
               loading="lazy"
               decoding="async"
